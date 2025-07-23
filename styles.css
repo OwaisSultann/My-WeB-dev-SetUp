@@ -1,714 +1,121 @@
-/* 
- * Advanced Car Racing Game Styles
- * Created by Owais
- * Features: Neon effects, 3D transforms, particle animations, responsive design
- */
+/* --- Google Font Import --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-/* Reset and base styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* --- General Styling --- */
 body {
-    font-family: 'Orbitron', 'Courier New', monospace;
-    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
-    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    overflow: hidden; /* Hide scrollbars */
+    color: #f0f0f0; /* Light text color for dark background */
+}
+
+/* --- Page Containers --- */
+#home-page {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    height: 100vh;
+    text-align: center;
     padding: 20px;
-    overflow: hidden;
-    position: relative;
+    box-sizing: border-box;
+    /* Red and black gradient background */
+    background: linear-gradient(135deg, #4a0404, #121212);
+    transition: opacity 0.5s ease-in-out;
 }
 
-/* Animated background particles */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
+#game-page {
+    display: none; /* Initially hidden */
+    width: 100vw;
+    height: 100vh;
+}
+
+#game-canvas {
+    display: block;
     width: 100%;
     height: 100%;
-    background-image: 
-        radial-gradient(2px 2px at 20px 30px, #00ffff, transparent),
-        radial-gradient(2px 2px at 40px 70px, #ff00ff, transparent),
-        radial-gradient(1px 1px at 90px 40px, #ffff00, transparent),
-        radial-gradient(1px 1px at 130px 80px, #00ff00, transparent),
-        radial-gradient(2px 2px at 160px 30px, #ff0080, transparent);
-    background-repeat: repeat;
-    background-size: 200px 100px;
-    animation: sparkle 20s linear infinite;
-    opacity: 0.3;
-    z-index: -1;
 }
 
-@keyframes sparkle {
-    0% { transform: translateY(0px); }
-    100% { transform: translateY(-100px); }
+/* --- Home Page Text Styling --- */
+#home-page h1 {
+    font-size: 3.5rem;
+    color: #ff4141; /* Bright red */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    margin-bottom: 10px;
 }
 
-/* Game container with glassmorphism effect */
-.game-container {
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 2px solid;
-    border-image: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff) 1;
-    position: relative;
-    overflow: hidden;
+#home-page h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 15px;
 }
 
-/* Animated border glow */
-.game-container::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #ff0080, #00ffff);
-    border-radius: 24px;
-    z-index: -1;
-    animation: borderRotate 3s linear infinite;
-    opacity: 0.7;
+#home-page p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    line-height: 1.6;
+    color: #dcdcdc;
 }
 
-@keyframes borderRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Game header with neon text */
-.game-header {
-    text-align: center;
-    margin-bottom: 24px;
-    position: relative;
-}
-
-.game-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #00ffff;
-    margin-bottom: 12px;
-    text-shadow: 
-        0 0 5px #00ffff,
-        0 0 10px #00ffff,
-        0 0 15px #00ffff,
-        0 0 20px #00ffff;
-    animation: neonPulse 2s ease-in-out infinite alternate;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-}
-
-@keyframes neonPulse {
-    from {
-        text-shadow: 
-            0 0 5px #00ffff,
-            0 0 10px #00ffff,
-            0 0 15px #00ffff,
-            0 0 20px #00ffff;
-    }
-    to {
-        text-shadow: 
-            0 0 2px #00ffff,
-            0 0 5px #00ffff,
-            0 0 8px #00ffff,
-            0 0 12px #00ffff,
-            0 0 15px #ff00ff;
-    }
-}
-
-.score-display {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-.score-item {
-    color: #00ff00;
-    text-shadow: 0 0 10px #00ff00;
-    padding: 8px 16px;
-    background: rgba(0, 255, 0, 0.1);
-    border-radius: 12px;
-    border: 1px solid rgba(0, 255, 0, 0.3);
-}
-
-.high-score-item {
-    color: #ff00ff;
-    text-shadow: 0 0 10px #ff00ff;
-    padding: 8px 16px;
-    background: rgba(255, 0, 255, 0.1);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 0, 255, 0.3);
-}
-
-/* Game area with 3D perspective */
-.game-area {
-    position: relative;
-    width: 360px;
-    height: 480px;
-    border: 4px solid #00ffff;
-    border-radius: 16px;
-    overflow: hidden;
-    background: 
-        linear-gradient(to bottom, #1a1a2e 0%, #16213e 50%, #0f3460 100%),
-        repeating-linear-gradient(
-            to bottom,
-            transparent 0px,
-            transparent 28px,
-            rgba(0, 255, 255, 0.1) 28px,
-            rgba(0, 255, 255, 0.1) 32px
-        );
-    background-size: 100% 100%, 100% 60px;
-    box-shadow: 
-        0 0 30px rgba(0, 255, 255, 0.5),
-        inset 0 0 30px rgba(0, 0, 0, 0.5);
-    transform: perspective(1000px) rotateX(5deg);
-}
-
-.game-area.playing {
-    animation: roadScroll 1s linear infinite;
-}
-
-/* Enhanced road animations */
-@keyframes roadScroll {
-    0% { background-position-y: 0px, 0px; }
-    100% { background-position-y: 0px, 60px; }
-}
-
-/* Futuristic road markings */
-.road-markings {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    width: 6px;
-    height: 100%;
-    background: repeating-linear-gradient(
-        to bottom,
-        #ffff00 0px,
-        #ffff00 20px,
-        transparent 20px,
-        transparent 40px
-    );
-    opacity: 0.9;
-    transform: translateX(-50%);
-    box-shadow: 0 0 10px #ffff00;
-}
-
-.road-markings.playing {
-    animation: roadMarkings 0.5s linear infinite;
-}
-
-@keyframes roadMarkings {
-    0% { background-position-y: 0px; }
-    100% { background-position-y: 40px; }
-}
-
-/* Advanced car styling with 3D effects */
-.car {
-    position: absolute;
-    z-index: 10;
-    width: 40px;
-    height: 60px;
-    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8));
-}
-
-.car-body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform: perspective(200px) rotateX(15deg);
-}
-
-.car-main {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #00ffff 0%, #0080ff 50%, #0040ff 100%);
-    border-radius: 12px;
-    box-shadow: 
-        0 4px 8px rgba(0, 0, 0, 0.3),
-        0 0 20px rgba(0, 255, 255, 0.6),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3);
-    border: 2px solid #40e0d0;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Car details with enhanced styling */
-.car-windshield {
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 28px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(0, 255, 255, 0.3) 100%);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-.car-rear {
-    position: absolute;
-    bottom: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28px;
-    height: 14px;
-    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
-    border-radius: 4px;
-    box-shadow: 0 0 8px rgba(255, 68, 68, 0.8);
-}
-
-.car-headlight {
-    position: absolute;
-    top: 2px;
-    width: 8px;
-    height: 8px;
-    background: radial-gradient(circle, #ffff00 0%, #ffcc00 70%, #ff9900 100%);
+/* --- Creator Picture Styling --- */
+#creator-pic {
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
-    box-shadow: 
-        0 0 8px #ffff00,
-        0 0 16px rgba(255, 255, 0, 0.5);
-    animation: headlightFlicker 3s ease-in-out infinite;
+    border: 5px solid #ff4141; /* Red border */
+    margin: 20px 0;
+    object-fit: cover;
+    box-shadow: 0 0 25px rgba(255, 65, 65, 0.5); /* Glowing red shadow */
 }
 
-@keyframes headlightFlicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.car-headlight.left {
-    left: 6px;
-}
-
-.car-headlight.right {
-    right: 6px;
-}
-
-.car-side {
-    position: absolute;
-    top: 16px;
-    width: 6px;
-    height: 20px;
-    background: linear-gradient(135deg, #40e0d0 0%, #00bfff 100%);
-    box-shadow: 0 0 5px rgba(64, 224, 208, 0.6);
-}
-
-.car-side.left {
-    left: -2px;
-    border-radius: 0 6px 6px 0;
-}
-
-.car-side.right {
-    right: -2px;
-    border-radius: 6px 0 0 6px;
-}
-
-.car-glow {
-    position: absolute;
-    inset: -4px;
-    background: linear-gradient(135deg, #00ffff, #ff00ff);
-    border-radius: 16px;
-    opacity: 0.3;
-    filter: blur(8px);
-    animation: carGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes carGlow {
-    from { opacity: 0.2; transform: scale(1); }
-    to { opacity: 0.4; transform: scale(1.05); }
-}
-
-/* Enhanced obstacles with particle effects */
-.obstacle {
-    position: absolute;
-    background: linear-gradient(45deg, #ff0040 0%, #cc0000 50%, #800000 100%);
-    border-radius: 12px;
-    box-shadow: 
-        0 0 20px rgba(255, 0, 64, 0.8),
-        inset 0 2px 4px rgba(255, 255, 255, 0.2);
-    border: 2px solid #ff4080;
-    animation: obstacleRotate 2s linear infinite;
-    position: relative;
-    overflow: hidden;
-}
-
-.obstacle::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    animation: obstacleShine 3s linear infinite;
-}
-
-@keyframes obstacleRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes obstacleShine {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Game overlays with advanced effects */
-.game-overlay {
-    position: absolute;
-    inset: 0;
-    background: 
-        radial-gradient(circle at center, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%),
-        linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-}
-
-.overlay-content {
-    text-align: center;
-    padding: 32px;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 16px;
-    border: 2px solid rgba(0, 255, 255, 0.3);
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
-}
-
-.overlay-title {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #00ffff;
-    margin-bottom: 20px;
-    text-shadow: 0 0 15px #00ffff;
-    animation: titlePulse 2s ease-in-out infinite;
-}
-
-@keyframes titlePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.overlay-title.game-over {
-    color: #ff0040;
-    text-shadow: 0 0 15px #ff0040;
-    animation: gameOverShake 0.5s ease-in-out infinite;
-}
-
-@keyframes gameOverShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-2px); }
-    75% { transform: translateX(2px); }
-}
-
-.overlay-text {
-    color: #cccccc;
-    margin-bottom: 20px;
-    font-size: 1rem;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.overlay-score {
-    color: #00ff00;
-    margin-bottom: 12px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-shadow: 0 0 10px #00ff00;
-}
-
-.new-high-score {
-    color: #ffff00;
-    margin-bottom: 20px;
-    font-size: 1.1rem;
-    animation: celebrationBounce 0.6s ease-in-out infinite;
-    text-shadow: 0 0 15px #ffff00;
-}
-
-@keyframes celebrationBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-.overlay-button {
-    background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
-    color: white;
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-weight: bold;
+/* --- Button Styling --- */
+button {
+    font-family: 'Poppins', sans-serif;
     border: none;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    font-weight: 600;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+#play-button {
+    padding: 15px 40px;
+    font-size: 1.5rem; /* 24px */
+    margin-top: 20px;
+    background-color: #d92525; /* Strong red */
+    color: white;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: all 0.3s ease;
-    box-shadow: 
-        0 4px 15px rgba(0, 255, 255, 0.4),
-        0 0 20px rgba(255, 0, 255, 0.3);
-    position: relative;
-    overflow: hidden;
 }
 
-.overlay-button::before {
-    content: '';
+#play-button:hover {
+    background-color: #ff4141; /* Brighter red on hover */
+}
+
+#home-button {
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
-}
-
-.overlay-button:hover::before {
-    left: 100%;
-}
-
-.overlay-button:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 
-        0 8px 25px rgba(0, 255, 255, 0.6),
-        0 0 30px rgba(255, 0, 255, 0.5);
-}
-
-.overlay-button.resume {
-    background: linear-gradient(135deg, #00ff00 0%, #00ccff 100%);
-    box-shadow: 
-        0 4px 15px rgba(0, 255, 0, 0.4),
-        0 0 20px rgba(0, 204, 255, 0.3);
-}
-
-/* Advanced game controls */
-.game-controls {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 24px;
-    flex-wrap: wrap;
-}
-
-.control-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: relative;
-    overflow: hidden;
-}
-
-.control-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s, height 0.3s;
-}
-
-.control-button:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-.control-button:hover {
-    transform: translateY(-3px) scale(1.05);
-}
-
-.control-button.start {
-    background: linear-gradient(135deg, #00ff00 0%, #00cc66 100%);
+    top: 20px;
+    left: 20px;
+    padding: 12px 24px;
+    font-size: 1rem; /* 16px */
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
-    box-shadow: 
-        0 4px 15px rgba(0, 255, 0, 0.4),
-        0 0 20px rgba(0, 204, 102, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.8);
 }
 
-.control-button.pause {
-    background: linear-gradient(135deg, #ffaa00 0%, #ff6600 100%);
-    color: white;
-    box-shadow: 
-        0 4px 15px rgba(255, 170, 0, 0.4),
-        0 0 20px rgba(255, 102, 0, 0.3);
-}
-
-.control-button.restart {
-    background: linear-gradient(135deg, #0080ff 0%, #0040cc 100%);
-    color: white;
-    box-shadow: 
-        0 4px 15px rgba(0, 128, 255, 0.4),
-        0 0 20px rgba(0, 64, 204, 0.3);
-}
-
-.control-button.sound-on {
-    background: linear-gradient(135deg, #ff00ff 0%, #cc00cc 100%);
-    color: white;
-    box-shadow: 
-        0 4px 15px rgba(255, 0, 255, 0.4),
-        0 0 20px rgba(204, 0, 204, 0.3);
-}
-
-.control-button.sound-off {
-    background: linear-gradient(135deg, #666666 0%, #444444 100%);
-    color: #cccccc;
-    box-shadow: 
-        0 4px 15px rgba(102, 102, 102, 0.4),
-        0 0 20px rgba(68, 68, 68, 0.3);
-}
-
-/* Instructions with neon effect */
-.game-instructions {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 0.8rem;
-    color: #888888;
-    text-shadow: 0 0 5px rgba(136, 136, 136, 0.5);
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Responsive design for mobile */
-@media (max-width: 480px) {
-    body {
-        padding: 10px;
-    }
-    
-    .game-container {
-        padding: 20px;
-        border-radius: 16px;
-    }
-    
-    .game-title {
-        font-size: 1.8rem;
-        letter-spacing: 2px;
-    }
-    
-    .game-area {
-        width: 300px;
-        height: 400px;
-        transform: perspective(800px) rotateX(3deg);
-    }
-    
-    .score-display {
-        gap: 20px;
-        font-size: 0.9rem;
-    }
-    
-    .game-controls {
-        gap: 12px;
-    }
-    
-    .control-button {
-        padding: 10px 16px;
-        font-size: 0.8rem;
-    }
-    
-    .overlay-title {
-        font-size: 1.5rem;
-    }
-    
-    .overlay-button {
-        padding: 12px 24px;
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 360px) {
-    .game-area {
-        width: 280px;
-        height: 360px;
-    }
-    
-    .game-title {
-        font-size: 1.5rem;
-        letter-spacing: 1px;
-    }
-    
-    .score-display {
-        flex-direction: column;
-        gap: 8px;
-    }
-}
-
-/* Loading animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.game-container {
-    animation: fadeIn 1s ease-out;
-}
-
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #00ffff, #ff00ff);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #ff00ff, #00ffff);
-}
-
-/* Performance optimizations */
-.car, .obstacle, .game-area {
-    will-change: transform;
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .game-container {
-        border: 3px solid white;
-        background: black;
-    }
-    
-    .game-title {
-        color: white;
-        text-shadow: none;
-    }
-    
-    .control-button {
-        border: 2px solid white;
-    }
+#home-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
 }

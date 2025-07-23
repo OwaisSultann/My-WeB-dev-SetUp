@@ -3,435 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Racing Game</title>
+    <title>3D Car Game by Owais</title>
     <link rel="stylesheet" href="styles.css">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Basic styles to make it functional without external CSS */
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            overflow: hidden; /* Hide scrollbars */
+            background-color: #f0f0f0;
+        }
+        #home-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #game-page {
+            display: none; /* Initially hidden */
+            width: 100vw;
+            height: 100vh;
+        }
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        #play-button {
+             padding: 15px 30px;
+             font-size: 24px;
+             cursor: pointer;
+             margin-top: 20px;
+        }
+        #creator-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin: 20px 0;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useCallback, useRef } = React;
+    <!-- Home Page Section -->
+    <div id="home-page">
+        <h1>Awesome 3D Car Game</h1>
+        <h2>Made by Owais</h2>
+        <p>This incredible game was crafted by the talented developer, Owais, showcasing amazing skill and creativity!</p>
+        
+        <!-- Placeholder for your picture -->
+        <img id="creator-pic" src="Owais.jpeg" alt="A picture of Owais">
+        
+        <button id="play-button">Play Game</button>
+    </div>
 
-        // Custom hook for game loop
-        const useGameLoop = (callback, delay) => {
-            const callbackRef = useRef(callback);
-            const timeoutRef = useRef();
+    <!-- Game Page Section -->
+    <div id="game-page">
+        <canvas id="game-canvas"></canvas>
+        <button id="home-button">Back to Home</button>
+    </div>
 
-            useEffect(() => {
-                callbackRef.current = callback;
-            }, [callback]);
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-            useEffect(() => {
-                if (delay !== null) {
-                    const tick = () => {
-                        callbackRef.current();
-                        timeoutRef.current = setTimeout(tick, delay);
-                    };
-                    timeoutRef.current = setTimeout(tick, delay);
+    <script type="module">
+        // --- Page Navigation ---
+        const homePage = document.getElementById('home-page');
+        const gamePage = document.getElementById('game-page');
+        const playButton = document.getElementById('play-button');
+        const homeButton = document.getElementById('home-button');
 
-                    return () => {
-                        if (timeoutRef.current) {
-                            clearTimeout(timeoutRef.current);
-                        }
-                    };
-                }
-            }, [delay]);
-        };
+        let gameInstance = null;
 
-        // Car Component
-        const Car = ({ x, y }) => {
-            return (
-                <div
-                    style={{
-                        position: 'absolute',
-                        left: x,
-                        top: y,
-                        width: 40,
-                        height: 60,
-                        backgroundColor: 'blue',
-                        border: '2px solid darkblue',
-                        zIndex: 10
-                    }}
-                >
-                    🚗
-                </div>
-            );
-        };
+        playButton.addEventListener('click', () => {
+            homePage.style.display = 'none';
+            gamePage.style.display = 'block';
+            // Initialize and start the game only when the play button is clicked
+            if (!gameInstance) {
+                gameInstance = new Game();
+            }
+        });
 
-        // Game Controls Component
-        const GameControls = ({
-            gameState,
-            soundEnabled,
-            onPlay,
-            onPause,
-            onResume,
-            onRestart,
-            onToggleSound,
-        }) => {
-            return (
-                <div>
-                    {gameState === 'menu' ? (
-                        <button onClick={onPlay}>
-                            ▶ Start
-                        </button>
-                    ) : gameState === 'playing' ? (
-                        <button onClick={onPause}>
-                            ⏸ Pause
-                        </button>
-                    ) : gameState === 'paused' ? (
-                        <button onClick={onResume}>
-                            ▶ Resume
-                        </button>
-                    ) : (
-                        <button onClick={onPlay}>
-                            ▶ Start
-                        </button>
-                    )}
+        homeButton.addEventListener('click', () => {
+            homePage.style.display = 'flex';
+            gamePage.style.display = 'none';
+            // Optional: Stop the game loop when returning home to save resources
+            // if(gameInstance) gameInstance.stop();
+        });
 
-                    <button onClick={onRestart}>
-                        🔄 Restart
-                    </button>
-
-                    <button onClick={onToggleSound}>
-                        {soundEnabled ? '🔊' : '🔇'} Sound
-                    </button>
-                </div>
-            );
-        };
-
-        // Main Game Component
-        const Game = () => {
-            const [gameState, setGameState] = useState('menu');
-            const [score, setScore] = useState(0);
-            const [highScore, setHighScore] = useState(() => {
-                const saved = localStorage.getItem('carGameHighScore');
-                return saved ? parseInt(saved, 10) : 0;
-            });
-            const [soundEnabled, setSoundEnabled] = useState(true);
-            const [carPosition, setCarPosition] = useState({ x: 160, y: 400 });
-            const [obstacles, setObstacles] = useState([]);
-            const [keys, setKeys] = useState(new Set());
-            
-            const gameAreaRef = useRef();
-            const obstacleIdRef = useRef(0);
-
-            const playStartSound = () => {
-                if (!soundEnabled) return;
-                try {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    
-                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-                    oscillator.frequency.setValueAtTime(554, audioContext.currentTime + 0.1);
-                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.2);
-                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                    
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.3);
-                } catch (e) {
-                    console.log('Audio not supported');
-                }
-            };
-
-            const handleGameOver = useCallback(() => {
-                setGameState('gameOver');
-                if (score > highScore) {
-                    setHighScore(score);
-                    localStorage.setItem('carGameHighScore', score.toString());
-                }
-                if (soundEnabled) {
-                    try {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        
-                        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-                        oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                        
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.5);
-                    } catch (e) {
-                        console.log('Audio not supported');
-                    }
-                }
-            }, [score, highScore, soundEnabled]);
-
-            const updateGame = useCallback(() => {
-                // Move car based on keys
-                setCarPosition(prev => {
-                    let newX = prev.x;
-                    let newY = prev.y;
-
-                    if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) {
-                        newX = Math.max(10, prev.x - 8);
-                    }
-                    if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) {
-                        newX = Math.min(310, prev.x + 8);
-                    }
-                    if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) {
-                        newY = Math.max(10, prev.y - 6);
-                    }
-                    if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) {
-                        newY = Math.min(460, prev.y + 6);
-                    }
-
-                    return { x: newX, y: newY };
-                });
-
-                // Move obstacles and generate new ones
-                setObstacles(prev => {
-                    const updated = prev
-                        .map(obstacle => ({
-                            ...obstacle,
-                            y: obstacle.y + 4 + Math.floor(score / 200)
-                        }))
-                        .filter(obstacle => obstacle.y < 500);
-
-                    // Add new obstacles randomly
-                    if (Math.random() < 0.015 + score / 15000) {
-                        updated.push({
-                            id: obstacleIdRef.current++,
-                            x: Math.random() * 300,
-                            y: -50,
-                            width: 35 + Math.random() * 15,
-                            height: 35 + Math.random() * 15
-                        });
-                    }
-
-                    return updated;
-                });
-
-                // Update score
-                setScore(prev => prev + 1);
-            }, [keys, score]);
-
-            // Game loop
-            useGameLoop(() => {
-                if (gameState === 'playing') {
-                    updateGame();
-                }
-            }, gameState === 'playing' ? 16 : null);
-
-            // Check collisions
-            useEffect(() => {
-                if (gameState !== 'playing') return;
-
-                const carRect = { x: carPosition.x, y: carPosition.y, width: 40, height: 60 };
+        // --- 3D Game Logic ---
+        class Game {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
                 
-                for (const obstacle of obstacles) {
-                    if (
-                        carRect.x < obstacle.x + obstacle.width &&
-                        carRect.x + carRect.width > obstacle.x &&
-                        carRect.y < obstacle.y + obstacle.height &&
-                        carRect.y + carRect.height > obstacle.y
-                    ) {
-                        handleGameOver();
-                        return;
-                    }
+                this.car = null;
+                this.keys = {}; // To store keyboard state
+
+                this.init();
+            }
+
+            init() {
+                // Renderer setup
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.shadowMap.enabled = true;
+
+                // Scene background
+                this.scene.background = new THREE.Color(0x87ceeb); // Sky blue
+
+                // Camera position
+                this.camera.position.set(0, 5, 10);
+                this.camera.lookAt(0, 0, 0);
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                this.scene.add(ambientLight);
+
+                const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                dirLight.position.set(-30, 50, -30);
+                dirLight.castShadow = true;
+                dirLight.shadow.camera.top = 50;
+                dirLight.shadow.camera.bottom = -50;
+                dirLight.shadow.camera.left = -50;
+                dirLight.shadow.camera.right = 50;
+                this.scene.add(dirLight);
+
+                // Ground plane
+                const groundGeometry = new THREE.PlaneGeometry(500, 500);
+                const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x556b2f }); // Dark olive green
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+
+                // Car (as a box)
+                const carGeometry = new THREE.BoxGeometry(2, 1, 4); // width, height, length
+                const carMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 }); // Red
+                this.car = new THREE.Mesh(carGeometry, carMaterial);
+                this.car.position.y = 0.5;
+                this.car.castShadow = true;
+                this.scene.add(this.car);
+
+                // Event Listeners
+                this.addEventListeners();
+
+                // Start animation loop
+                this.animate();
+            }
+
+            addEventListeners() {
+                window.addEventListener('keydown', (event) => {
+                    this.keys[event.key.toLowerCase()] = true;
+                });
+                window.addEventListener('keyup', (event) => {
+                    this.keys[event.key.toLowerCase()] = false;
+                });
+                window.addEventListener('resize', () => this.onWindowResize());
+            }
+
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            updateCar() {
+                const moveSpeed = 0.2;
+                const turnSpeed = 0.03;
+
+                // Forward/Backward movement
+                if (this.keys['w'] || this.keys['arrowup']) {
+                    this.car.position.z -= Math.cos(this.car.rotation.y) * moveSpeed;
+                    this.car.position.x -= Math.sin(this.car.rotation.y) * moveSpeed;
                 }
-            }, [carPosition, obstacles, gameState, handleGameOver]);
+                if (this.keys['s'] || this.keys['arrowdown']) {
+                    this.car.position.z += Math.cos(this.car.rotation.y) * moveSpeed;
+                    this.car.position.x += Math.sin(this.car.rotation.y) * moveSpeed;
+                }
+                
+                // Turning (Steering)
+                if (this.keys['a'] || this.keys['arrowleft']) {
+                    this.car.rotation.y += turnSpeed;
+                }
+                if (this.keys['d'] || this.keys['arrowright']) {
+                    this.car.rotation.y -= turnSpeed;
+                }
 
-            const startGame = () => {
-                setGameState('playing');
-                setScore(0);
-                setCarPosition({ x: 160, y: 400 });
-                setObstacles([]);
-                obstacleIdRef.current = 0;
-                playStartSound();
-            };
+                // Update camera to follow the car
+                const cameraOffset = new THREE.Vector3(0, 5, 10);
+                cameraOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.car.rotation.y);
+                this.camera.position.copy(this.car.position).add(cameraOffset);
+                this.camera.lookAt(this.car.position);
+            }
 
-            const pauseGame = () => {
-                setGameState('paused');
-            };
+            animate() {
+                requestAnimationFrame(() => this.animate());
 
-            const resumeGame = () => {
-                setGameState('playing');
-            };
+                if (this.car) {
+                    this.updateCar();
+                }
 
-            const restartGame = () => {
-                setGameState('playing');
-                setScore(0);
-                setCarPosition({ x: 160, y: 400 });
-                setObstacles([]);
-                obstacleIdRef.current = 0;
-                playStartSound();
-            };
-
-            const toggleSound = () => {
-                setSoundEnabled(!soundEnabled);
-            };
-
-            // Keyboard event handlers
-            useEffect(() => {
-                const handleKeyDown = (e) => {
-                    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-                        e.preventDefault();
-                    }
-                    setKeys(prev => new Set(prev).add(e.key));
-                };
-
-                const handleKeyUp = (e) => {
-                    setKeys(prev => {
-                        const newKeys = new Set(prev);
-                        newKeys.delete(e.key);
-                        return newKeys;
-                    });
-                };
-
-                window.addEventListener('keydown', handleKeyDown);
-                window.addEventListener('keyup', handleKeyUp);
-
-                return () => {
-                    window.removeEventListener('keydown', handleKeyDown);
-                    window.removeEventListener('keyup', handleKeyUp);
-                };
-            }, []);
-
-            return (
-                <div>
-                    <div>
-                        <h1>🏎️ Car Racing Game</h1>
-                        <div>
-                            <span>Score: {score}</span>
-                            <span> | High Score: {highScore}</span>
-                        </div>
-                    </div>
-
-                    {/* Game Area */}
-                    <div 
-                        ref={gameAreaRef}
-                        style={{
-                            position: 'relative',
-                            width: '320px',
-                            height: '400px',
-                            border: '2px solid black',
-                            backgroundColor: '#333',
-                            overflow: 'hidden',
-                            margin: '20px auto'
-                        }}
-                    >
-                        {/* Car */}
-                        <Car x={carPosition.x} y={carPosition.y} />
-                        
-                        {/* Obstacles */}
-                        {obstacles.map(obstacle => (
-                            <div
-                                key={obstacle.id}
-                                style={{
-                                    position: 'absolute',
-                                    left: obstacle.x,
-                                    top: obstacle.y,
-                                    width: obstacle.width,
-                                    height: obstacle.height,
-                                    backgroundColor: 'red',
-                                    border: '1px solid darkred'
-                                }}
-                            />
-                        ))}
-
-                        {/* Game State Overlays */}
-                        {gameState === 'menu' && (
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                color: 'white',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column'
-                            }}>
-                                <h2>Ready to Race?</h2>
-                                <p>Use arrow keys or WASD to move</p>
-                                <button onClick={startGame}>Start Game</button>
-                            </div>
-                        )}
-
-                        {gameState === 'paused' && (
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                color: 'white',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column'
-                            }}>
-                                <h2>Paused</h2>
-                                <button onClick={resumeGame}>Resume</button>
-                            </div>
-                        )}
-
-                        {gameState === 'gameOver' && (
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                color: 'white',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column'
-                            }}>
-                                <h2>Game Over!</h2>
-                                <p>Final Score: {score}</p>
-                                {score === highScore && <p>🎉 New High Score!</p>}
-                                <button onClick={restartGame}>Play Again</button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Game Controls */}
-                    <div style={{ textAlign: 'center', margin: '20px' }}>
-                        <GameControls
-                            gameState={gameState}
-                            soundEnabled={soundEnabled}
-                            onPlay={startGame}
-                            onPause={pauseGame}
-                            onResume={resumeGame}
-                            onRestart={restartGame}
-                            onToggleSound={toggleSound}
-                        />
-                    </div>
-
-                    <div style={{ textAlign: 'center', fontSize: '12px', color: '#666' }}>
-                        <p>Controls: Arrow Keys or WASD • Avoid red obstacles!</p>
-                    </div>
-                </div>
-            );
-        };
-
-        // Main App Component
-        const App = () => {
-            return <Game />;
-        };
-
-        // Render the app
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
     </script>
 </body>
 </html>
