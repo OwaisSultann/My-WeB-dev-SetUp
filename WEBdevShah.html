@@ -3,157 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUMS Summer Schools</title>
-    <!-- Tailwind CSS CDN -->
+    <title>🏎️ Neon Racer - Car Game</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.344.0/dist/umd/lucide-react.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
+        @keyframes roadScroll {
+            0% { background-position-y: 0px; }
+            100% { background-position-y: 60px; }
+        }
+
+        @keyframes roadMarkings {
+            0% { background-position-y: 0px; }
+            100% { background-position-y: 40px; }
+        }
+
+        .road-scroll {
+            animation: roadScroll 1s linear infinite;
+        }
+
+        .road-markings {
+            animation: roadMarkings 0.5s linear infinite;
         }
     </style>
 </head>
-<body class="antialiased">
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-white shadow-md py-4 px-6 rounded-b-lg">
-            <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
-                <a href="#" class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">LUMS Summer Schools</a>
-                <nav>
-                    <ul class="flex space-x-6">
-                        <li><a href="#about" class="text-gray-600 hover:text-blue-600 transition duration-300">About</a></li>
-                        <li><a href="#programs" class="text-gray-600 hover:text-blue-600 transition duration-300">Programs</a></li>
-                        <li><a href="#gallery" class="text-gray-600 hover:text-blue-600 transition duration-300">Gallery</a></li>
-                        <li><a href="#contact" class="text-gray-600 hover:text-blue-600 transition duration-300">Contact</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+<body>
+    <div id="root"></div>
 
-        <!-- Hero Section -->
-        <section class="bg-blue-700 text-white py-20 px-6 text-center rounded-b-lg shadow-lg">
-            <div class="container mx-auto">
-                <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Experience the LUMS Difference This Summer!</h1>
-                <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto">
-                    Join our exciting summer programs designed to inspire, educate, and empower the next generation of leaders.
-                </p>
-                <a href="#programs" class="bg-white text-blue-700 hover:bg-blue-100 font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
-                    Explore Programs
-                </a>
-            </div>
-        </section>
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+        const { Play, Pause, RotateCcw, Volume2, VolumeX } = lucideReact;
 
-        <!-- About Section -->
-        <section id="about" class="py-16 px-6 bg-gray-50 rounded-lg shadow-inner mx-4 my-8">
-            <div class="container mx-auto text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-8">About LUMS Summer Schools</h2>
-                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
-                    <div class="md:w-1/2">
-                        <p class="text-gray-700 text-lg leading-relaxed mb-4">
-                            LUMS Summer Schools offer a unique opportunity for high school students and young professionals to delve into diverse academic fields, develop critical thinking skills, and experience university life at Pakistan's premier institution. Our programs are meticulously crafted to provide an enriching and immersive learning environment.
-                        </p>
-                        <p class="text-gray-700 text-lg leading-relaxed">
-                            Through interactive sessions, hands-on projects, and engaging discussions, participants gain valuable insights, expand their horizons, and build a strong foundation for future academic and professional success.
-                        </p>
-                    </div>
-                    <div class="md:w-1/2">
-                        <img src="Owaispic.jpeg" alt="LUMS Campus" class="rounded-lg shadow-xl w-full h-auto object-cover">
+        // Custom hook for game loop
+        const useGameLoop = (callback, delay) => {
+            const callbackRef = useRef(callback);
+            const timeoutRef = useRef();
+
+            useEffect(() => {
+                callbackRef.current = callback;
+            }, [callback]);
+
+            useEffect(() => {
+                if (delay !== null) {
+                    const tick = () => {
+                        callbackRef.current();
+                        timeoutRef.current = setTimeout(tick, delay);
+                    };
+                    timeoutRef.current = setTimeout(tick, delay);
+
+                    return () => {
+                        if (timeoutRef.current) {
+                            clearTimeout(timeoutRef.current);
+                        }
+                    };
+                }
+            }, [delay]);
+        };
+
+        // Car Component
+        const Car = ({ x, y }) => {
+            return (
+                <div
+                    className="absolute z-10"
+                    style={{
+                        left: x,
+                        top: y,
+                        width: 40,
+                        height: 60,
+                    }}
+                >
+                    <div className="relative w-full h-full">
+                        <div className="absolute inset-0 bg-gradient-to-b from-cyan-400 via-blue-500 to-blue-700 rounded-lg shadow-lg border-2 border-cyan-300">
+                            <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-4 h-6 bg-gradient-to-b from-blue-200 to-blue-900 rounded-sm opacity-90"></div>
+                            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-3 bg-gradient-to-b from-red-400 to-red-700 rounded-sm"></div>
+                            <div className="absolute top-0 left-1 w-1.5 h-1.5 bg-yellow-300 rounded-full shadow-lg"></div>
+                            <div className="absolute top-0 right-1 w-1.5 h-1.5 bg-yellow-300 rounded-full shadow-lg"></div>
+                            <div className="absolute top-3 left-0 w-1 h-4 bg-cyan-300 rounded-r"></div>
+                            <div className="absolute top-3 right-0 w-1 h-4 bg-cyan-300 rounded-l"></div>
+                        </div>
+                        <div className="absolute inset-0 bg-cyan-400 rounded-lg opacity-20 blur-sm animate-pulse"></div>
                     </div>
                 </div>
-            </div>
-        </section>
+            );
+        };
 
-        <!-- Programs Section -->
-        <section id="programs" class="py-16 px-6 bg-white rounded-lg shadow-md mx-4 my-8">
-            <div class="container mx-auto text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-12">Our Exciting Programs</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Program Card 1 -->
-                    <div class="bg-blue-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
-                        <img src="Owaispic.jpeg" alt="Business Program" class="rounded-md mb-4 w-full h-48 object-cover">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Young Leaders in Business</h3>
-                        <p class="text-gray-600">
-                            Explore the fundamentals of business, entrepreneurship, and management. Develop leadership skills and real-world problem-solving abilities.
-                        </p>
-                    </div>
-                    <!-- Program Card 2 -->
-                    <div class="bg-blue-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
-                        <img src="https://placehold.co/400x250/FFD700/000000?text=Tech+Program" alt="Tech Program" class="rounded-md mb-4 w-full h-48 object-cover">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Innovation in Technology</h3>
-                        <p class="text-gray-600">
-                            Dive into the world of coding, AI, and emerging technologies. Hands-on projects and expert-led workshops await!
-                        </p>
-                    </div>
-                    <!-- Program Card 3 -->
-                    <div class="bg-blue-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
-                        <img src="https://placehold.co/400x250/FF6347/000000?text=Humanities+Program" alt="Humanities Program" class="rounded-md mb-4 w-full h-48 object-cover">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Arts & Social Sciences Immersion</h3>
-                        <p class="text-gray-600">
-                            Engage with literature, history, psychology, and sociology. Foster critical thinking and a deeper understanding of society.
-                        </p>
+        // Game Controls Component
+        const GameControls = ({
+            gameState,
+            soundEnabled,
+            onPlay,
+            onPause,
+            onResume,
+            onRestart,
+            onToggleSound,
+        }) => {
+            return (
+                <div className="flex justify-center gap-3 mt-4">
+                    {gameState === 'menu' ? (
+                        <button
+                            onClick={onPlay}
+                            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-green-500/25"
+                        >
+                            <Play size={18} />
+                            Start
+                        </button>
+                    ) : gameState === 'playing' ? (
+                        <button
+                            onClick={onPause}
+                            className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25"
+                        >
+                            <Pause size={18} />
+                            Pause
+                        </button>
+                    ) : gameState === 'paused' ? (
+                        <button
+                            onClick={onResume}
+                            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-green-500/25"
+                        >
+                            <Play size={18} />
+                            Resume
+                        </button>
+                    ) : (
+                        <button
+                            onClick={onPlay}
+                            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-green-500/25"
+                        >
+                            <Play size={18} />
+                            Start
+                        </button>
+                    )}
+
+                    <button
+                        onClick={onRestart}
+                        className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
+                    >
+                        <RotateCcw size={18} />
+                        Restart
+                    </button>
+
+                    <button
+                        onClick={onToggleSound}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg ${
+                            soundEnabled
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-purple-500/25'
+                                : 'bg-gradient-to-r from-gray-500 to-gray-600 text-gray-300 hover:shadow-gray-500/25'
+                        }`}
+                    >
+                        {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                        Sound
+                    </button>
+                </div>
+            );
+        };
+
+        // Main Game Component
+        const Game = () => {
+            const [gameState, setGameState] = useState('menu');
+            const [score, setScore] = useState(0);
+            const [highScore, setHighScore] = useState(() => {
+                const saved = localStorage.getItem('carGameHighScore');
+                return saved ? parseInt(saved, 10) : 0;
+            });
+            const [soundEnabled, setSoundEnabled] = useState(true);
+            const [carPosition, setCarPosition] = useState({ x: 160, y: 400 });
+            const [obstacles, setObstacles] = useState([]);
+            const [keys, setKeys] = useState(new Set());
+            
+            const gameAreaRef = useRef();
+            const obstacleIdRef = useRef(0);
+
+            const playStartSound = () => {
+                if (!soundEnabled) return;
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(554, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            };
+
+            const handleGameOver = useCallback(() => {
+                setGameState('gameOver');
+                if (score > highScore) {
+                    setHighScore(score);
+                    localStorage.setItem('carGameHighScore', score.toString());
+                }
+                if (soundEnabled) {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    } catch (e) {
+                        console.log('Audio not supported');
+                    }
+                }
+            }, [score, highScore, soundEnabled]);
+
+            const updateGame = useCallback(() => {
+                // Move car based on keys
+                setCarPosition(prev => {
+                    let newX = prev.x;
+                    let newY = prev.y;
+
+                    if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) {
+                        newX = Math.max(10, prev.x - 8);
+                    }
+                    if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) {
+                        newX = Math.min(310, prev.x + 8);
+                    }
+                    if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) {
+                        newY = Math.max(10, prev.y - 6);
+                    }
+                    if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) {
+                        newY = Math.min(460, prev.y + 6);
+                    }
+
+                    return { x: newX, y: newY };
+                });
+
+                // Move obstacles and generate new ones
+                setObstacles(prev => {
+                    const updated = prev
+                        .map(obstacle => ({
+                            ...obstacle,
+                            y: obstacle.y + 4 + Math.floor(score / 200)
+                        }))
+                        .filter(obstacle => obstacle.y < 500);
+
+                    // Add new obstacles randomly
+                    if (Math.random() < 0.015 + score / 15000) {
+                        updated.push({
+                            id: obstacleIdRef.current++,
+                            x: Math.random() * 300,
+                            y: -50,
+                            width: 35 + Math.random() * 15,
+                            height: 35 + Math.random() * 15
+                        });
+                    }
+
+                    return updated;
+                });
+
+                // Update score
+                setScore(prev => prev + 1);
+            }, [keys, score]);
+
+            // Game loop
+            useGameLoop(() => {
+                if (gameState === 'playing') {
+                    updateGame();
+                }
+            }, gameState === 'playing' ? 16 : null);
+
+            // Check collisions
+            useEffect(() => {
+                if (gameState !== 'playing') return;
+
+                const carRect = { x: carPosition.x, y: carPosition.y, width: 40, height: 60 };
+                
+                for (const obstacle of obstacles) {
+                    if (
+                        carRect.x < obstacle.x + obstacle.width &&
+                        carRect.x + carRect.width > obstacle.x &&
+                        carRect.y < obstacle.y + obstacle.height &&
+                        carRect.y + carRect.height > obstacle.y
+                    ) {
+                        handleGameOver();
+                        return;
+                    }
+                }
+            }, [carPosition, obstacles, gameState, handleGameOver]);
+
+            const startGame = () => {
+                setGameState('playing');
+                setScore(0);
+                setCarPosition({ x: 160, y: 400 });
+                setObstacles([]);
+                obstacleIdRef.current = 0;
+                playStartSound();
+            };
+
+            const pauseGame = () => {
+                setGameState('paused');
+            };
+
+            const resumeGame = () => {
+                setGameState('playing');
+            };
+
+            const restartGame = () => {
+                setGameState('playing');
+                setScore(0);
+                setCarPosition({ x: 160, y: 400 });
+                setObstacles([]);
+                obstacleIdRef.current = 0;
+                playStartSound();
+            };
+
+            const toggleSound = () => {
+                setSoundEnabled(!soundEnabled);
+            };
+
+            // Keyboard event handlers
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    setKeys(prev => new Set(prev).add(e.key));
+                };
+
+                const handleKeyUp = (e) => {
+                    setKeys(prev => {
+                        const newKeys = new Set(prev);
+                        newKeys.delete(e.key);
+                        return newKeys;
+                    });
+                };
+
+                window.addEventListener('keydown', handleKeyDown);
+                window.addEventListener('keyup', handleKeyUp);
+
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                    window.removeEventListener('keyup', handleKeyUp);
+                };
+            }, []);
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+                    <div className="bg-black rounded-2xl p-6 shadow-2xl border border-purple-500/20">
+                        <div className="text-center mb-4">
+                            <h1 className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                                🏎️ Neon Racer
+                            </h1>
+                            <div className="flex justify-center gap-8 text-sm">
+                                <span className="text-cyan-400">Score: {score}</span>
+                                <span className="text-purple-400">High Score: {highScore}</span>
+                            </div>
+                        </div>
+
+                        {/* Game Area */}
+                        <div 
+                            ref={gameAreaRef}
+                            className="relative w-80 h-96 border-4 border-cyan-500/50 rounded-lg overflow-hidden"
+                            style={{ 
+                                background: 'repeating-linear-gradient(to bottom, #1f2937 0px, #1f2937 30px, #374151 30px, #374151 60px)',
+                                backgroundSize: '100% 60px'
+                            }}
+                        >
+                            {/* Animated road */}
+                            <div 
+                                className={`absolute inset-0 ${gameState === 'playing' ? 'road-scroll' : ''}`}
+                                style={{ 
+                                    background: 'repeating-linear-gradient(to bottom, #1f2937 0px, #1f2937 30px, #374151 30px, #374151 60px)',
+                                    backgroundSize: '100% 60px'
+                                }}
+                            ></div>
+                            
+                            {/* Road markings */}
+                            <div 
+                                className={`absolute left-1/2 top-0 w-2 h-full bg-yellow-400 opacity-80 transform -translate-x-1/2 ${gameState === 'playing' ? 'road-markings' : ''}`}
+                                style={{
+                                    background: 'repeating-linear-gradient(to bottom, #fbbf24 0px, #fbbf24 20px, transparent 20px, transparent 40px)'
+                                }}
+                            ></div>
+                            
+                            {/* Car */}
+                            <Car x={carPosition.x} y={carPosition.y} />
+                            
+                            {/* Obstacles */}
+                            {obstacles.map(obstacle => (
+                                <div
+                                    key={obstacle.id}
+                                    className="absolute bg-red-500 rounded-lg shadow-lg border-2 border-red-400"
+                                    style={{
+                                        left: obstacle.x,
+                                        top: obstacle.y,
+                                        width: obstacle.width,
+                                        height: obstacle.height,
+                                        boxShadow: '0 0 15px rgba(239, 68, 68, 0.7)',
+                                        background: 'linear-gradient(45deg, #ef4444, #dc2626)'
+                                    }}
+                                />
+                            ))}
+
+                            {/* Game State Overlays */}
+                            {gameState === 'menu' && (
+                                <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <h2 className="text-2xl font-bold text-white mb-4">Ready to Race?</h2>
+                                        <p className="text-gray-300 mb-4 text-sm">Use arrow keys or WASD to move</p>
+                                        <button
+                                            onClick={startGame}
+                                            className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-transform"
+                                        >
+                                            Start Game
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {gameState === 'paused' && (
+                                <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <h2 className="text-2xl font-bold text-white mb-4">Paused</h2>
+                                        <button
+                                            onClick={resumeGame}
+                                            className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-transform"
+                                        >
+                                            Resume
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {gameState === 'gameOver' && (
+                                <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <h2 className="text-2xl font-bold text-red-400 mb-2">Game Over!</h2>
+                                        <p className="text-white mb-2">Final Score: {score}</p>
+                                        {score === highScore && <p className="text-yellow-400 mb-4">🎉 New High Score!</p>}
+                                        <button
+                                            onClick={restartGame}
+                                            className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-transform"
+                                        >
+                                            Play Again
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Game Controls */}
+                        <GameControls
+                            gameState={gameState}
+                            soundEnabled={soundEnabled}
+                            onPlay={startGame}
+                            onPause={pauseGame}
+                            onResume={resumeGame}
+                            onRestart={restartGame}
+                            onToggleSound={toggleSound}
+                        />
+
+                        <div className="text-center mt-4 text-xs text-gray-400">
+                            <p>Controls: Arrow Keys or WASD • Avoid red obstacles!</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            );
+        };
 
-        <!-- Gallery Section -->
-        <section id="gallery" class="py-16 px-6 bg-gray-50 rounded-lg shadow-inner mx-4 my-8">
-            <div class="container mx-auto text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-12">Moments from Our Summer Schools</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                        <img src="https://placehold.co/600x400/87CEEB/000000?text=Students+Collaborating" alt="Students Collaborating" class="w-full h-64 object-cover">
-                    </div>
-                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                        <img src="https://placehold.co/600x400/F08080/000000?text=Lecture+Session" alt="Lecture Session" class="w-full h-64 object-cover">
-                    </div>
-                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                        <img src="https://placehold.co/600x400/DA70D6/000000?text=Outdoor+Activity" alt="Outdoor Activity" class="w-full h-64 object-cover">
-                    </div>
-                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                        <img src="https://placehold.co/600x400/FFA07A/000000?text=Group+Discussion" alt="Group Discussion" class="w-full h-64 object-cover">
-                    </div>
-                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                        <img src="https://placehold.co/600x400/98FB98/000000?text=Lab+Work" alt="Lab Work" class="w-full h-64 object-cover">
-                    </div>
-                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                        <img src="https://placehold.co/600x400/DDA0DD/000000?text=Graduation+Ceremony" alt="Graduation Ceremony" class="w-full h-64 object-cover">
-                    </div>
+        // Main App Component
+        const App = () => {
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+                    <Game />
                 </div>
-            </div>
-        </section>
+            );
+        };
 
-        <!-- Contact Section -->
-        <section id="contact" class="py-16 px-6 bg-blue-700 text-white rounded-lg shadow-lg mx-4 my-8">
-            <div class="container mx-auto text-center">
-                <h2 class="text-3xl font-bold mb-8">Get in Touch</h2>
-                <p class="text-lg mb-8 max-w-2xl mx-auto">
-                    Have questions about our summer programs? Feel free to reach out to us!
-                </p>
-                <div class="flex flex-col md:flex-row justify-center items-center gap-8">
-                    <div class="text-center">
-                        <p class="text-xl font-semibold mb-2">Email Us:</p>
-                        <a href="mailto:summerschools@lums.edu.pk" class="text-blue-200 hover:text-white transition duration-300">summerschools@lums.edu.pk</a>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xl font-semibold mb-2">Call Us:</p>
-                        <a href="tel:+9242111115867" class="text-blue-200 hover:text-white transition duration-300">+92 42 111 115 867</a>
-                    </div>
-                </div>
-                <p class="mt-8 text-md">
-                    Lahore University of Management Sciences (LUMS), Sector U, DHA, Lahore 54792, Pakistan.
-                </p>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-gray-800 text-white py-6 px-6 text-center mt-auto rounded-t-lg shadow-lg">
-            <div class="container mx-auto">
-                <p>&copy; 2024 LUMS Summer Schools. All rights reserved.</p>
-            </div>
-        </footer>
-    </div>
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
 </html>
-
